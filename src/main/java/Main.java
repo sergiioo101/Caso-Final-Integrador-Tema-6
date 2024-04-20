@@ -1,6 +1,6 @@
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -8,6 +8,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.List;
 
 import indexacion.Indexador;
@@ -16,8 +17,8 @@ import visualizacion.Visualizador;
 public class Main {
     private JFrame frame;
     private JPanel panel;
-    private JLabel labelDirectorio;
     private JTextField campoDirectorio;
+    private JButton botonSeleccionarDirectorio;
     private JButton botonIndexar;
     private JButton botonVisualizar;
     private JButton botonSalir;
@@ -32,17 +33,23 @@ public class Main {
         panel = new JPanel();
         panel.setLayout(new FlowLayout());
 
-        labelDirectorio = new JLabel("Directorio:");
         campoDirectorio = new JTextField(20);
+        botonSeleccionarDirectorio = new JButton("Seleccionar Directorio");
         botonIndexar = new JButton("Indexar archivos");
         botonVisualizar = new JButton("Visualizar archivos indexados");
         botonSalir = new JButton("Salir");
+
+        botonSeleccionarDirectorio.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                seleccionarDirectorio();
+            }
+        });
 
         botonIndexar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String rutaDirectorio = campoDirectorio.getText();
                 if (rutaDirectorio.isEmpty()) {
-                    mostrarMensaje("Debe ingresar una ruta de directorio.");
+                    mostrarMensaje("Debe seleccionar un directorio.");
                 } else {
                     mostrarMensaje("Indexando archivos en " + rutaDirectorio);
                     indexarArchivos(rutaDirectorio);
@@ -62,8 +69,8 @@ public class Main {
             }
         });
 
-        panel.add(labelDirectorio);
         panel.add(campoDirectorio);
+        panel.add(botonSeleccionarDirectorio);
         panel.add(botonIndexar);
         panel.add(botonVisualizar);
         panel.add(botonSalir);
@@ -74,6 +81,16 @@ public class Main {
 
         indexador = new Indexador();
         visualizador = new Visualizador();
+    }
+
+    private void seleccionarDirectorio() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int opcion = fileChooser.showOpenDialog(frame);
+        if (opcion == JFileChooser.APPROVE_OPTION) {
+            File directorioSeleccionado = fileChooser.getSelectedFile();
+            campoDirectorio.setText(directorioSeleccionado.getAbsolutePath());
+        }
     }
 
     private void indexarArchivos(String rutaDirectorio) {
@@ -105,4 +122,5 @@ public class Main {
         new Main();
     }
 }
+
 
