@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ManejadorDatos {
-    public static void ordenarLista(List<? extends Comparable<?>> lista) {
+    public static <T extends Comparable<? super T>> void ordenarLista(List<T> lista) {
         Collections.sort(lista);
     }
 
