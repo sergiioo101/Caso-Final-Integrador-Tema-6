@@ -9,10 +9,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
-
-import indexacion.Indexador;
-import visualizacion.Visualizador;
 
 public class Main {
     private JFrame frame;
@@ -23,8 +21,7 @@ public class Main {
     private JButton botonVisualizar;
     private JButton botonSalir;
 
-    private Indexador indexador;
-    private Visualizador visualizador;
+    private List<File> archivosIndexados;
 
     public Main() {
         frame = new JFrame("Sistema de Gestión y Análisis de Datos Multidimensionales");
@@ -79,8 +76,7 @@ public class Main {
         frame.pack();
         frame.setVisible(true);
 
-        indexador = new Indexador();
-        visualizador = new Visualizador();
+        archivosIndexados = new ArrayList<>();
     }
 
     private void seleccionarDirectorio() {
@@ -94,16 +90,38 @@ public class Main {
     }
 
     private void indexarArchivos(String rutaDirectorio) {
-        indexador.indexarDirectorio(rutaDirectorio);
+        File directorio = new File(rutaDirectorio);
+        if (!directorio.exists() || !directorio.isDirectory()) {
+            mostrarMensaje("La ruta especificada no es un directorio válido.");
+            return;
+        }
+        archivosIndexados.clear();
+        indexarDirectorio(directorio);
         mostrarMensaje("Archivos indexados correctamente.");
     }
 
+    private void indexarDirectorio(File directorio) {
+        File[] archivos = directorio.listFiles();
+        if (archivos != null) {
+            for (File archivo : archivos) {
+                if (archivo.isFile()) {
+                    archivosIndexados.add(archivo);
+                } else if (archivo.isDirectory()) {
+                    indexarDirectorio(archivo);
+                }
+            }
+        }
+    }
+
     private void mostrarArchivosIndexados() {
-        List<String> archivosIndexados = indexador.getArchivosIndexados();
         if (archivosIndexados.isEmpty()) {
             mostrarMensaje("No hay archivos indexados para mostrar.");
         } else {
-            visualizador.mostrarArchivos(archivosIndexados);
+            StringBuilder sb = new StringBuilder();
+            for (File archivo : archivosIndexados) {
+                sb.append(archivo.getAbsolutePath()).append("\n");
+            }
+            mostrarMensaje(sb.toString());
         }
     }
 
@@ -122,5 +140,8 @@ public class Main {
         new Main();
     }
 }
+
+
+
 
 
