@@ -1,9 +1,4 @@
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -22,11 +17,12 @@ public class Main {
     private JTextField campoDirectorio;
     private JButton botonSeleccionarDirectorio;
     private JButton botonIndexar;
-    private JButton botonBuscar;
     private JButton botonVisualizar;
+    private JButton botonBuscar;
     private JButton botonSalir;
 
     private List<Archivo> archivosIndexados;
+    private JPanel panelArchivosIndexados;
 
     public Main() {
         frame = new JFrame("Sistema de Gestión y Análisis de Datos Multidimensionales");
@@ -38,8 +34,8 @@ public class Main {
         campoDirectorio = new JTextField(20);
         botonSeleccionarDirectorio = new JButton("Seleccionar Directorio");
         botonIndexar = new JButton("Indexar archivos");
-        botonBuscar = new JButton("Buscar archivo por nombre");
         botonVisualizar = new JButton("Visualizar archivos indexados");
+        botonBuscar = new JButton("Buscar");
         botonSalir = new JButton("Salir");
 
         botonSeleccionarDirectorio.addActionListener(new ActionListener() {
@@ -60,15 +56,15 @@ public class Main {
             }
         });
 
-        botonBuscar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                buscarArchivo();
-            }
-        });
-
         botonVisualizar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 mostrarArchivosIndexados();
+            }
+        });
+
+        botonBuscar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                buscarArchivo();
             }
         });
 
@@ -81,15 +77,19 @@ public class Main {
         panel.add(campoDirectorio);
         panel.add(botonSeleccionarDirectorio);
         panel.add(botonIndexar);
-        panel.add(botonBuscar);
         panel.add(botonVisualizar);
+        panel.add(botonBuscar);
         panel.add(botonSalir);
 
-        frame.getContentPane().add(panel, BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
+        frame.getContentPane().add(panel, BorderLayout.NORTH);
 
         archivosIndexados = new ArrayList<>();
+        panelArchivosIndexados = new JPanel();
+        panelArchivosIndexados.setLayout(new BoxLayout(panelArchivosIndexados, BoxLayout.Y_AXIS));
+        frame.getContentPane().add(panelArchivosIndexados, BorderLayout.CENTER);
+
+        frame.pack();
+        frame.setVisible(true);
     }
 
     private void seleccionarDirectorio() {
@@ -103,50 +103,57 @@ public class Main {
     }
 
     private void indexarArchivos(String rutaDirectorio) {
-        File directorio = new File(rutaDirectorio);
-        if (!directorio.exists() || !directorio.isDirectory()) {
-            mostrarMensaje("La ruta especificada no es un directorio válido.");
-            return;
-        }
-        archivosIndexados.clear();
-        indexarDirectorio(directorio);
+        Indexador indexador = new Indexador();
+        indexador.indexarDirectorio(rutaDirectorio);
+        archivosIndexados = indexador.getArchivosIndexados();
         mostrarMensaje("Archivos indexados correctamente.");
+        mostrarArchivosIndexados();
     }
 
-    private void indexarDirectorio(File directorio) {
-        File[] archivos = directorio.listFiles();
-        if (archivos != null) {
-            for (File archivo : archivos) {
-                if (archivo.isFile()) {
-                    archivosIndexados.add(new Archivo(archivo.getAbsolutePath()));
-                } else if (archivo.isDirectory()) {
-                    indexarDirectorio(archivo);
-                }
-            }
+    private void mostrarArchivosIndexados() {
+        panelArchivosIndexados.removeAll();
+        for (Archivo archivo : archivosIndexados) {
+            agregarArchivoUI(archivo);
         }
+        frame.revalidate();
+        frame.repaint();
     }
 
     private void buscarArchivo() {
         String nombreArchivo = JOptionPane.showInputDialog(frame, "Ingrese el nombre del archivo a buscar:");
         if (nombreArchivo != null && !nombreArchivo.isEmpty()) {
-            int indice = Busqueda.busquedaBinaria(archivosIndexados.toArray(new Archivo[0]), new Archivo(nombreArchivo));
+            Archivo archivoBuscado = new Archivo(nombreArchivo);
+            int indice = Busqueda.busquedaBinaria(archivosIndexados.toArray(new Archivo[0]), archivoBuscado);
             if (indice != -1) {
-                mostrarMensaje("El archivo '" + nombreArchivo + "' fue encontrado en la posición " + indice);
+                mostrarMensaje("El archivo " + nombreArchivo + " se encuentra en la lista de archivos indexados.");
             } else {
-                mostrarMensaje("El archivo '" + nombreArchivo + "' no fue encontrado.");
+                mostrarMensaje("El archivo " + nombreArchivo + " no se encuentra en la lista de archivos indexados.");
             }
         }
     }
 
-    private void mostrarArchivosIndexados() {
-        if (archivosIndexados.isEmpty()) {
-            mostrarMensaje("No hay archivos indexados para mostrar.");
-        } else {
-            StringBuilder sb = new StringBuilder();
-            for (Archivo archivo : archivosIndexados) {
-                sb.append(archivo.toString()).append("\n");
+    private void agregarArchivoUI(final Archivo archivo) {
+        final JPanel panelArchivo = new JPanel(new BorderLayout());
+        final JLabel labelArchivo = new JLabel(archivo.toString());
+        JButton botonEliminar = new JButton("Eliminar");
+        botonEliminar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                eliminarArchivo(archivo);
+                panelArchivosIndexados.remove(panelArchivo);
+                frame.revalidate();
+                frame.repaint();
             }
-            mostrarMensaje(sb.toString());
+        });
+        panelArchivo.add(labelArchivo, BorderLayout.CENTER);
+        panelArchivo.add(botonEliminar, BorderLayout.EAST);
+        panelArchivosIndexados.add(panelArchivo);
+    }
+
+    private void eliminarArchivo(Archivo archivo) {
+        archivosIndexados.remove(archivo);
+        boolean eliminado = new File(archivo.getRuta()).delete();
+        if (!eliminado) {
+            mostrarMensaje("No se pudo eliminar el archivo: " + archivo.getRuta());
         }
     }
 
@@ -165,6 +172,7 @@ public class Main {
         new Main();
     }
 }
+
 
 
 

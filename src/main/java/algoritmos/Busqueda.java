@@ -1,6 +1,5 @@
 package algoritmos;
 
-
 import indexacion.Archivo;
 
 public class Busqueda {
