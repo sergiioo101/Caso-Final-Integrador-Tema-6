@@ -1,7 +1,10 @@
 package algoritmos;
 
+
+import indexacion.Archivo;
+
 public class Busqueda {
-    public static int busquedaBinaria(Comparable[] arr, Comparable elemento) {
+    public static int busquedaBinaria(Archivo[] arr, Archivo elemento) {
         int izquierda = 0;
         int derecha = arr.length - 1;
 
@@ -20,3 +23,4 @@ public class Busqueda {
         return -1; // Si no se encuentra el elemento
     }
 }
+

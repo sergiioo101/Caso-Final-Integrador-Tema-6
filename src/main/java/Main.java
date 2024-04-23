@@ -14,6 +14,7 @@ import java.util.List;
 
 import indexacion.Archivo;
 import indexacion.Indexador;
+import algoritmos.Busqueda;
 
 public class Main {
     private JFrame frame;
@@ -21,6 +22,7 @@ public class Main {
     private JTextField campoDirectorio;
     private JButton botonSeleccionarDirectorio;
     private JButton botonIndexar;
+    private JButton botonBuscar;
     private JButton botonVisualizar;
     private JButton botonSalir;
 
@@ -36,6 +38,7 @@ public class Main {
         campoDirectorio = new JTextField(20);
         botonSeleccionarDirectorio = new JButton("Seleccionar Directorio");
         botonIndexar = new JButton("Indexar archivos");
+        botonBuscar = new JButton("Buscar archivo por nombre");
         botonVisualizar = new JButton("Visualizar archivos indexados");
         botonSalir = new JButton("Salir");
 
@@ -57,6 +60,12 @@ public class Main {
             }
         });
 
+        botonBuscar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                buscarArchivo();
+            }
+        });
+
         botonVisualizar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 mostrarArchivosIndexados();
@@ -72,6 +81,7 @@ public class Main {
         panel.add(campoDirectorio);
         panel.add(botonSeleccionarDirectorio);
         panel.add(botonIndexar);
+        panel.add(botonBuscar);
         panel.add(botonVisualizar);
         panel.add(botonSalir);
 
@@ -116,6 +126,18 @@ public class Main {
         }
     }
 
+    private void buscarArchivo() {
+        String nombreArchivo = JOptionPane.showInputDialog(frame, "Ingrese el nombre del archivo a buscar:");
+        if (nombreArchivo != null && !nombreArchivo.isEmpty()) {
+            int indice = Busqueda.busquedaBinaria(archivosIndexados.toArray(new Archivo[0]), new Archivo(nombreArchivo));
+            if (indice != -1) {
+                mostrarMensaje("El archivo '" + nombreArchivo + "' fue encontrado en la posición " + indice);
+            } else {
+                mostrarMensaje("El archivo '" + nombreArchivo + "' no fue encontrado.");
+            }
+        }
+    }
+
     private void mostrarArchivosIndexados() {
         if (archivosIndexados.isEmpty()) {
             mostrarMensaje("No hay archivos indexados para mostrar.");
@@ -143,6 +165,7 @@ public class Main {
         new Main();
     }
 }
+
 
 
 

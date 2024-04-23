@@ -3,7 +3,7 @@ package indexacion;
 import java.io.File;
 import java.util.Date;
 
-public class Archivo {
+public class Archivo implements Comparable<Archivo> {
     private String nombre;
     private String ruta;
     private long tamaño;
@@ -37,8 +37,14 @@ public class Archivo {
     }
 
     @Override
+    public int compareTo(Archivo otroArchivo) {
+        return this.nombre.compareTo(otroArchivo.getNombre());
+    }
+
+    @Override
     public String toString() {
         return "Nombre: " + nombre + ", Ruta: " + ruta + ", Tamaño: " + tamaño + " bytes, Fecha de Modificación: " + fechaModificacion;
     }
 }
+
 
