@@ -12,6 +12,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import indexacion.Archivo;
+import indexacion.Indexador;
+
 public class Main {
     private JFrame frame;
     private JPanel panel;
@@ -21,7 +24,7 @@ public class Main {
     private JButton botonVisualizar;
     private JButton botonSalir;
 
-    private List<File> archivosIndexados;
+    private List<Archivo> archivosIndexados;
 
     public Main() {
         frame = new JFrame("Sistema de Gestión y Análisis de Datos Multidimensionales");
@@ -105,7 +108,7 @@ public class Main {
         if (archivos != null) {
             for (File archivo : archivos) {
                 if (archivo.isFile()) {
-                    archivosIndexados.add(archivo);
+                    archivosIndexados.add(new Archivo(archivo.getAbsolutePath()));
                 } else if (archivo.isDirectory()) {
                     indexarDirectorio(archivo);
                 }
@@ -118,8 +121,8 @@ public class Main {
             mostrarMensaje("No hay archivos indexados para mostrar.");
         } else {
             StringBuilder sb = new StringBuilder();
-            for (File archivo : archivosIndexados) {
-                sb.append(archivo.getAbsolutePath()).append("\n");
+            for (Archivo archivo : archivosIndexados) {
+                sb.append(archivo.toString()).append("\n");
             }
             mostrarMensaje(sb.toString());
         }
@@ -140,6 +143,8 @@ public class Main {
         new Main();
     }
 }
+
+
 
 
 
