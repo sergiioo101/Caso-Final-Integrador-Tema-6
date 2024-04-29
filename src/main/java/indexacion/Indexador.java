@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Indexador {
-    private List<String> archivosIndexados;
+    private List<Archivo> archivosIndexados;
 
     public Indexador() {
         archivosIndexados = new ArrayList<>();
@@ -27,14 +27,15 @@ public class Indexador {
                 if (archivo.isDirectory()) {
                     indexarRecursivo(archivo);
                 } else {
-                    archivosIndexados.add(archivo.getAbsolutePath());
+                    archivosIndexados.add(new Archivo(archivo.getAbsolutePath()));
                 }
             }
         }
     }
 
-    public List<String> getArchivosIndexados() {
+    public List<Archivo> getArchivosIndexados() {
         return archivosIndexados;
     }
 }
+
 

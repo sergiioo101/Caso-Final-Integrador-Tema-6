@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import indexacion.Archivo;
@@ -106,24 +107,34 @@ public class Main {
         Indexador indexador = new Indexador();
         indexador.indexarDirectorio(rutaDirectorio);
         archivosIndexados = indexador.getArchivosIndexados();
-        mostrarMensaje("Archivos indexados correctamente.");
-        mostrarArchivosIndexados();
+        Collections.sort(archivosIndexados);
+        mostrarMensaje("Archivos indexados correctamente. Cantidad de archivos indexados: " + archivosIndexados.size());
+        JOptionPane.showMessageDialog(frame, "Ruta del directorio indexado:\n" + rutaDirectorio);
     }
 
     private void mostrarArchivosIndexados() {
         panelArchivosIndexados.removeAll();
+        StringBuilder rutasArchivos = new StringBuilder();
         for (Archivo archivo : archivosIndexados) {
-            agregarArchivoUI(archivo);
+            JLabel labelArchivo = new JLabel(archivo.toString());
+            panelArchivosIndexados.add(labelArchivo);
+            rutasArchivos.append(archivo.getRuta()).append("\n");
         }
-        frame.revalidate();
-        frame.repaint();
+        JOptionPane.showMessageDialog(frame, "Rutas de los archivos:\n" + rutasArchivos.toString());
+        panelArchivosIndexados.revalidate();
+        panelArchivosIndexados.repaint();
     }
 
     private void buscarArchivo() {
         String nombreArchivo = JOptionPane.showInputDialog(frame, "Ingrese el nombre del archivo a buscar:");
         if (nombreArchivo != null && !nombreArchivo.isEmpty()) {
-            Archivo archivoBuscado = new Archivo(nombreArchivo);
-            int indice = Busqueda.busquedaBinaria(archivosIndexados.toArray(new Archivo[0]), archivoBuscado);
+            int indice = -1;
+            for (int i = 0; i < archivosIndexados.size(); i++) {
+                if (archivosIndexados.get(i).getNombre().equals(nombreArchivo)) {
+                    indice = i;
+                    break;
+                }
+            }
             if (indice != -1) {
                 mostrarMensaje("El archivo " + nombreArchivo + " se encuentra en la lista de archivos indexados.");
             } else {
@@ -135,6 +146,7 @@ public class Main {
     private void agregarArchivoUI(final Archivo archivo) {
         final JPanel panelArchivo = new JPanel(new BorderLayout());
         final JLabel labelArchivo = new JLabel(archivo.toString());
+        final JLabel labelHorario = new JLabel("Horario: " + archivo.getHorario()); // Asumiendo que 'horario' es un campo accesible en Archivo
         JButton botonEliminar = new JButton("Eliminar");
         botonEliminar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -145,9 +157,11 @@ public class Main {
             }
         });
         panelArchivo.add(labelArchivo, BorderLayout.CENTER);
+        panelArchivo.add(labelHorario, BorderLayout.NORTH); // Mostrar el horario encima del nombre del archivo
         panelArchivo.add(botonEliminar, BorderLayout.EAST);
         panelArchivosIndexados.add(panelArchivo);
     }
+
 
     private void eliminarArchivo(Archivo archivo) {
         archivosIndexados.remove(archivo);
@@ -172,6 +186,8 @@ public class Main {
         new Main();
     }
 }
+
+
 
 
 

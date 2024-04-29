@@ -45,6 +45,10 @@ public class Archivo implements Comparable<Archivo> {
     public String toString() {
         return "Nombre: " + nombre + ", Ruta: " + ruta + ", Tamaño: " + tamaño + " bytes, Fecha de Modificación: " + fechaModificacion;
     }
+
+    public String getHorario() {
+        return "Horario: " + fechaModificacion.getHours() + ":" + fechaModificacion.getMinutes();
+    }
 }
 
 
