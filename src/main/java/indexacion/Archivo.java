@@ -20,6 +20,13 @@ public class Archivo implements Comparable<Archivo> {
         this.fechaModificacion = new Date(archivo.lastModified());
     }
 
+    public Archivo(String nombre, String ruta, long tamaño, Date fechaModificacion) {
+        this.nombre = nombre;
+        this.ruta = ruta;
+        this.tamaño = tamaño;
+        this.fechaModificacion = fechaModificacion;
+    }
+
     public String getNombre() {
         return nombre;
     }

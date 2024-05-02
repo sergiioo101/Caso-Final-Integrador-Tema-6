@@ -1,21 +1,21 @@
 import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 
 import indexacion.Archivo;
 import indexacion.Indexador;
 import algoritmos.Busqueda;
 import mapas.AsociacionDatos;
+import algoritmos.Ordenacion;
 
 public class Main {
     private JFrame frame;
-    private JPanel panel;
+    private JTabbedPane tabbedPane;
+    private JPanel panelIndexacion;
+    private JPanel panelMapas;
     private JTextField campoDirectorio;
     private JButton botonSeleccionarDirectorio;
     private JButton botonIndexar;
@@ -26,14 +26,17 @@ public class Main {
     private List<Archivo> archivosIndexados;
     private JPanel panelArchivosIndexados;
     private AsociacionDatos<String, Archivo> asociacionArchivos;
-
+    private AsociacionDatos<Integer, String> asociacionNumeros;
+    private TreeSet<String> nombresArchivosOrdenados;
 
     public Main() {
         frame = new JFrame("Sistema de Gestión y Análisis de Datos Multidimensionales");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        panel = new JPanel();
-        panel.setLayout(new FlowLayout());
+        tabbedPane = new JTabbedPane();
+
+        panelIndexacion = new JPanel();
+        panelIndexacion.setLayout(new FlowLayout());
 
         campoDirectorio = new JTextField(20);
         botonSeleccionarDirectorio = new JButton("Seleccionar Directorio");
@@ -42,51 +45,76 @@ public class Main {
         botonBuscar = new JButton("Buscar");
         botonSalir = new JButton("Salir");
         asociacionArchivos = new AsociacionDatos<>();
+        asociacionNumeros = new AsociacionDatos<>();
+        nombresArchivosOrdenados = new TreeSet<>();
 
-        botonSeleccionarDirectorio.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                seleccionarDirectorio();
+        botonSeleccionarDirectorio.addActionListener(e -> seleccionarDirectorio());
+
+        botonIndexar.addActionListener(e -> {
+            String rutaDirectorio = campoDirectorio.getText();
+            if (rutaDirectorio.isEmpty()) {
+                mostrarMensaje("Debe seleccionar un directorio.");
+            } else {
+                mostrarMensaje("Indexando archivos en " + rutaDirectorio);
+                indexarArchivos(rutaDirectorio);
             }
         });
 
-        botonIndexar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String rutaDirectorio = campoDirectorio.getText();
-                if (rutaDirectorio.isEmpty()) {
-                    mostrarMensaje("Debe seleccionar un directorio.");
-                } else {
-                    mostrarMensaje("Indexando archivos en " + rutaDirectorio);
-                    indexarArchivos(rutaDirectorio);
-                }
+        botonVisualizar.addActionListener(e -> mostrarArchivosIndexados());
+
+        botonBuscar.addActionListener(e -> buscarArchivo());
+
+        botonSalir.addActionListener(e -> salir());
+
+        panelIndexacion.add(campoDirectorio);
+        panelIndexacion.add(botonSeleccionarDirectorio);
+        panelIndexacion.add(botonIndexar);
+        panelIndexacion.add(botonVisualizar);
+        panelIndexacion.add(botonBuscar);
+        panelIndexacion.add(botonSalir);
+
+        tabbedPane.addTab("Indexación y Modificación de Archivos", panelIndexacion);
+
+        // Crear el panel para la pestaña de Mapas y Asociación de Datos
+        panelMapas = new JPanel();
+        panelMapas.setLayout(new FlowLayout());
+
+        JTextField campoNumero = new JTextField(20);
+        JTextField campoTexto = new JTextField(20);
+        JButton botonAsociar = new JButton("Asociar");
+        botonAsociar.addActionListener(e -> {
+            try {
+                int numero = Integer.parseInt(campoNumero.getText());
+                String texto = campoTexto.getText();
+                asociarNumeroTexto(numero, texto);
+            } catch (NumberFormatException ex) {
+                mostrarMensaje("Debe ingresar un número válido.");
             }
         });
 
-        botonVisualizar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                mostrarArchivosIndexados();
+        JTextField campoClave = new JTextField(20);
+        JButton botonBuscarAsociacion = new JButton("Buscar Asociación");
+        botonBuscarAsociacion.addActionListener(e -> {
+            try {
+                int clave = Integer.parseInt(campoClave.getText());
+                buscarAsociacion(clave);
+            } catch (NumberFormatException ex) {
+                mostrarMensaje("Debe ingresar un número válido.");
             }
         });
 
-        botonBuscar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                buscarArchivo();
-            }
-        });
+        panelMapas.add(new JLabel("Número:"));
+        panelMapas.add(campoNumero);
+        panelMapas.add(new JLabel("Texto:"));
+        panelMapas.add(campoTexto);
+        panelMapas.add(botonAsociar);
+        panelMapas.add(new JLabel("Clave:"));
+        panelMapas.add(campoClave);
+        panelMapas.add(botonBuscarAsociacion);
 
-        botonSalir.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                salir();
-            }
-        });
+        tabbedPane.addTab("Mapas y Asociación de Datos", panelMapas);
 
-        panel.add(campoDirectorio);
-        panel.add(botonSeleccionarDirectorio);
-        panel.add(botonIndexar);
-        panel.add(botonVisualizar);
-        panel.add(botonBuscar);
-        panel.add(botonSalir);
-
-        frame.getContentPane().add(panel, BorderLayout.NORTH);
+        frame.getContentPane().add(tabbedPane, BorderLayout.NORTH);
 
         archivosIndexados = new ArrayList<>();
         panelArchivosIndexados = new JPanel();
@@ -120,31 +148,42 @@ public class Main {
         panelArchivosIndexados.repaint();
     }
 
-    private void agregarArchivoUI(final Archivo archivo) {
-        final JPanel panelArchivo = new JPanel(new BorderLayout());
-        final JLabel labelArchivo = new JLabel(archivo.toString());
-        final JLabel labelHorario = new JLabel("Horario: " + archivo.getHorario()); // Asumiendo que 'horario' es un campo accesible en Archivo
-        JButton botonEliminar = new JButton("Eliminar");
-        botonEliminar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                eliminarArchivo(archivo);
-                panelArchivosIndexados.remove(panelArchivo);
-                frame.revalidate();
-                frame.repaint();
-            }
-        });
-        panelArchivo.add(labelArchivo, BorderLayout.CENTER);
-        panelArchivo.add(labelHorario, BorderLayout.NORTH); // Mostrar el horario encima del nombre del archivo
-        panelArchivo.add(botonEliminar, BorderLayout.EAST);
-        panelArchivosIndexados.add(panelArchivo);
+    private void indexarArchivos(String rutaDirectorio) {
+        Indexador indexador = new Indexador();
+        indexador.indexarDirectorio(rutaDirectorio);
+        archivosIndexados = indexador.getArchivosIndexados();
+        Ordenacion.quickSort(archivosIndexados.toArray(new Archivo[0])); // Ordena los archivos indexados
+        for (Archivo archivo : archivosIndexados) {
+            asociacionArchivos.asociar(archivo.getNombre(), archivo);
+            nombresArchivosOrdenados.add(archivo.getNombre()); // Agrega el nombre del archivo al TreeSet
+        }
+        mostrarMensaje("Archivos indexados y ordenados correctamente. Cantidad de archivos indexados: " + archivosIndexados.size());
     }
 
+    private void buscarArchivo() {
+        String nombreArchivo = JOptionPane.showInputDialog(frame, "Ingrese el nombre del archivo a buscar:");
+        if (nombreArchivo != null && !nombreArchivo.isEmpty()) {
+            Archivo archivoBuscado = new Archivo(nombreArchivo); // Use the correct constructor
+            int indice = Busqueda.busquedaBinaria(archivosIndexados.toArray(new Archivo[0]), archivoBuscado);
+            if (indice != -1) {
+                mostrarMensaje("El archivo " + nombreArchivo + " se encuentra en la lista de archivos indexados.");
+            } else {
+                mostrarMensaje("El archivo " + nombreArchivo + " no se encuentra en la lista de archivos indexados.");
+            }
+        }
+    }
 
-    private void eliminarArchivo(Archivo archivo) {
-        archivosIndexados.remove(archivo);
-        boolean eliminado = new File(archivo.getRuta()).delete();
-        if (!eliminado) {
-            mostrarMensaje("No se pudo eliminar el archivo: " + archivo.getRuta());
+    private void asociarNumeroTexto(int numero, String texto) {
+        asociacionNumeros.asociar(numero, texto);
+        mostrarMensaje("El número " + numero + " ha sido asociado con el texto '" + texto + "'.");
+    }
+
+    private void buscarAsociacion(int clave) {
+        if (asociacionNumeros.contieneClave(clave)) {
+            String textoAsociado = asociacionNumeros.obtenerValor(clave);
+            mostrarMensaje("La clave " + clave + " está asociada con el texto: '" + textoAsociado + "'.");
+        } else {
+            mostrarMensaje("No se encontró ninguna asociación para la clave " + clave);
         }
     }
 
@@ -157,29 +196,6 @@ public class Main {
 
     private void mostrarMensaje(String mensaje) {
         JOptionPane.showMessageDialog(frame, mensaje);
-    }
-
-    private void indexarArchivos(String rutaDirectorio) {
-        Indexador indexador = new Indexador();
-        indexador.indexarDirectorio(rutaDirectorio);
-        archivosIndexados = indexador.getArchivosIndexados();
-        Collections.sort(archivosIndexados);
-        for (Archivo archivo : archivosIndexados) {
-            asociacionArchivos.asociar(archivo.getNombre(), archivo);
-        }
-        mostrarMensaje("Archivos indexados correctamente. Cantidad de archivos indexados: " + archivosIndexados.size());
-    }
-
-    private void buscarArchivo() {
-        String nombreArchivo = JOptionPane.showInputDialog(frame, "Ingrese el nombre del archivo a buscar:");
-        if (nombreArchivo != null && !nombreArchivo.isEmpty()) {
-            Archivo archivo = asociacionArchivos.obtenerValor(nombreArchivo);
-            if (archivo != null) {
-                mostrarMensaje("El archivo " + nombreArchivo + " se encuentra en la lista de archivos indexados.");
-            } else {
-                mostrarMensaje("El archivo " + nombreArchivo + " no se encuentra en la lista de archivos indexados.");
-            }
-        }
     }
 
     public static void main(String[] args) {
