@@ -16,6 +16,7 @@ public class Main {
     private JTabbedPane tabbedPane;
     private JPanel panelIndexacion;
     private JPanel panelMapas;
+    private JPanel panelAnalisis;
     private JTextField campoDirectorio;
     private JButton botonSeleccionarDirectorio;
     private JButton botonIndexar;
@@ -114,6 +115,43 @@ public class Main {
 
         tabbedPane.addTab("Mapas y Asociación de Datos", panelMapas);
 
+        // Crear el panel para la pestaña de Análisis y Organización de Información
+        panelAnalisis = new JPanel();
+        panelAnalisis.setLayout(new FlowLayout());
+
+        JTextField campoOrdenar = new JTextField(20);
+        JButton botonOrdenar = new JButton("Ordenar");
+        botonOrdenar.addActionListener(e -> {
+            String criterio = campoOrdenar.getText();
+            if (criterio.isEmpty()) {
+                mostrarMensaje("Debe ingresar un criterio de ordenación.");
+            } else {
+                mostrarMensaje("Ordenando transacciones por " + criterio);
+                ordenarTransacciones(criterio);
+            }
+        });
+
+        JTextField campoBuscarRegistro = new JTextField(20);
+        JButton botonBuscarRegistro = new JButton("Buscar Registro");
+        botonBuscarRegistro.addActionListener(e -> {
+            String clave = campoBuscarRegistro.getText();
+            if (clave.isEmpty()) {
+                mostrarMensaje("Debe ingresar una clave.");
+            } else {
+                mostrarMensaje("Buscando registro para " + clave);
+                buscarRegistro(clave);
+            }
+        });
+
+        panelAnalisis.add(new JLabel("Criterio de Ordenación:"));
+        panelAnalisis.add(campoOrdenar);
+        panelAnalisis.add(botonOrdenar);
+        panelAnalisis.add(new JLabel("Clave de Registro:"));
+        panelAnalisis.add(campoBuscarRegistro);
+        panelAnalisis.add(botonBuscarRegistro);
+
+        tabbedPane.addTab("Análisis y Organización de Información", panelAnalisis);
+
         frame.getContentPane().add(tabbedPane, BorderLayout.NORTH);
 
         archivosIndexados = new ArrayList<>();
@@ -185,6 +223,16 @@ public class Main {
         } else {
             mostrarMensaje("No se encontró ninguna asociación para la clave " + clave);
         }
+    }
+
+    private void ordenarTransacciones(String criterio) {
+        // Aquí debes implementar la lógica para ordenar las transacciones según el criterio ingresado
+        // Esto dependerá de cómo estés manejando tus datos y de qué clases ya hayas creado para este propósito
+    }
+
+    private void buscarRegistro(String clave) {
+        // Aquí debes implementar la lógica para buscar un registro según la clave ingresada
+        // Esto dependerá de cómo estés manejando tus datos y de qué clases ya hayas creado para este propósito
     }
 
     private void salir() {
