@@ -11,6 +11,7 @@ import java.util.List;
 import indexacion.Archivo;
 import indexacion.Indexador;
 import algoritmos.Busqueda;
+import mapas.AsociacionDatos;
 
 public class Main {
     private JFrame frame;
@@ -24,6 +25,8 @@ public class Main {
 
     private List<Archivo> archivosIndexados;
     private JPanel panelArchivosIndexados;
+    private AsociacionDatos<String, Archivo> asociacionArchivos;
+
 
     public Main() {
         frame = new JFrame("Sistema de Gestión y Análisis de Datos Multidimensionales");
@@ -38,6 +41,7 @@ public class Main {
         botonVisualizar = new JButton("Visualizar archivos indexados");
         botonBuscar = new JButton("Buscar");
         botonSalir = new JButton("Salir");
+        asociacionArchivos = new AsociacionDatos<>();
 
         botonSeleccionarDirectorio.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -103,15 +107,6 @@ public class Main {
         }
     }
 
-    private void indexarArchivos(String rutaDirectorio) {
-        Indexador indexador = new Indexador();
-        indexador.indexarDirectorio(rutaDirectorio);
-        archivosIndexados = indexador.getArchivosIndexados();
-        Collections.sort(archivosIndexados);
-        mostrarMensaje("Archivos indexados correctamente. Cantidad de archivos indexados: " + archivosIndexados.size());
-        JOptionPane.showMessageDialog(frame, "Ruta del directorio indexado:\n" + rutaDirectorio);
-    }
-
     private void mostrarArchivosIndexados() {
         panelArchivosIndexados.removeAll();
         StringBuilder rutasArchivos = new StringBuilder();
@@ -123,24 +118,6 @@ public class Main {
         JOptionPane.showMessageDialog(frame, "Rutas de los archivos:\n" + rutasArchivos.toString());
         panelArchivosIndexados.revalidate();
         panelArchivosIndexados.repaint();
-    }
-
-    private void buscarArchivo() {
-        String nombreArchivo = JOptionPane.showInputDialog(frame, "Ingrese el nombre del archivo a buscar:");
-        if (nombreArchivo != null && !nombreArchivo.isEmpty()) {
-            int indice = -1;
-            for (int i = 0; i < archivosIndexados.size(); i++) {
-                if (archivosIndexados.get(i).getNombre().equals(nombreArchivo)) {
-                    indice = i;
-                    break;
-                }
-            }
-            if (indice != -1) {
-                mostrarMensaje("El archivo " + nombreArchivo + " se encuentra en la lista de archivos indexados.");
-            } else {
-                mostrarMensaje("El archivo " + nombreArchivo + " no se encuentra en la lista de archivos indexados.");
-            }
-        }
     }
 
     private void agregarArchivoUI(final Archivo archivo) {
@@ -180,6 +157,29 @@ public class Main {
 
     private void mostrarMensaje(String mensaje) {
         JOptionPane.showMessageDialog(frame, mensaje);
+    }
+
+    private void indexarArchivos(String rutaDirectorio) {
+        Indexador indexador = new Indexador();
+        indexador.indexarDirectorio(rutaDirectorio);
+        archivosIndexados = indexador.getArchivosIndexados();
+        Collections.sort(archivosIndexados);
+        for (Archivo archivo : archivosIndexados) {
+            asociacionArchivos.asociar(archivo.getNombre(), archivo);
+        }
+        mostrarMensaje("Archivos indexados correctamente. Cantidad de archivos indexados: " + archivosIndexados.size());
+    }
+
+    private void buscarArchivo() {
+        String nombreArchivo = JOptionPane.showInputDialog(frame, "Ingrese el nombre del archivo a buscar:");
+        if (nombreArchivo != null && !nombreArchivo.isEmpty()) {
+            Archivo archivo = asociacionArchivos.obtenerValor(nombreArchivo);
+            if (archivo != null) {
+                mostrarMensaje("El archivo " + nombreArchivo + " se encuentra en la lista de archivos indexados.");
+            } else {
+                mostrarMensaje("El archivo " + nombreArchivo + " no se encuentra en la lista de archivos indexados.");
+            }
+        }
     }
 
     public static void main(String[] args) {
