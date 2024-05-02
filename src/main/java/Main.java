@@ -10,6 +10,8 @@ import indexacion.Indexador;
 import algoritmos.Busqueda;
 import mapas.AsociacionDatos;
 import algoritmos.Ordenacion;
+import utilidades.Transaccion;
+import utilidades.ComparadorTransaccion;
 
 public class Main {
     private JFrame frame;
@@ -29,6 +31,8 @@ public class Main {
     private AsociacionDatos<String, Archivo> asociacionArchivos;
     private AsociacionDatos<Integer, String> asociacionNumeros;
     private TreeSet<String> nombresArchivosOrdenados;
+    private TreeSet<Transaccion> transaccionesOrdenadas;
+    private AsociacionDatos<String, Transaccion> asociacionTransacciones;
 
     public Main() {
         frame = new JFrame("Sistema de Gestión y Análisis de Datos Multidimensionales");
@@ -48,6 +52,8 @@ public class Main {
         asociacionArchivos = new AsociacionDatos<>();
         asociacionNumeros = new AsociacionDatos<>();
         nombresArchivosOrdenados = new TreeSet<>();
+        asociacionTransacciones = new AsociacionDatos<>();
+        transaccionesOrdenadas = new TreeSet<>(new ComparadorTransaccion());
 
         botonSeleccionarDirectorio.addActionListener(e -> seleccionarDirectorio());
 
@@ -231,8 +237,12 @@ public class Main {
     }
 
     private void buscarRegistro(String clave) {
-        // Aquí debes implementar la lógica para buscar un registro según la clave ingresada
-        // Esto dependerá de cómo estés manejando tus datos y de qué clases ya hayas creado para este propósito
+        if (asociacionTransacciones.contieneClave(clave)) {
+            Transaccion transaccion = asociacionTransacciones.obtenerValor(clave);
+            mostrarMensaje("La clave " + clave + " está asociada con la transacción: " + transaccion.toString());
+        } else {
+            mostrarMensaje("No se encontró ningún registro para la clave " + clave);
+        }
     }
 
     private void salir() {
