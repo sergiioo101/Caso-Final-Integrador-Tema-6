@@ -1,32 +1,23 @@
 package modelo;
+public class Pareja {
+    private int primerElemento;
+    private int segundoElemento;
 
-public class Pareja<T, U> {
-    private T primero;
-    private U segundo;
-
-    public Pareja(T primero, U segundo) {
-        this.primero = primero;
-        this.segundo = segundo;
+    public Pareja(int primerElemento, int segundoElemento) {
+        this.primerElemento = primerElemento;
+        this.segundoElemento = segundoElemento;
     }
 
-    public T getPrimero() {
-        return primero;
+    public int getPrimerElemento() {
+        return primerElemento;
     }
 
-    public void setPrimero(T primero) {
-        this.primero = primero;
-    }
-
-    public U getSegundo() {
-        return segundo;
-    }
-
-    public void setSegundo(U segundo) {
-        this.segundo = segundo;
+    public int getSegundoElemento() {
+        return segundoElemento;
     }
 
     @Override
     public String toString() {
-        return "(" + primero.toString() + ", " + segundo.toString() + ")";
+        return "(" + primerElemento + ", " + segundoElemento + ")";
     }
 }
