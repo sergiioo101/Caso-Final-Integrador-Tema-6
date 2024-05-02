@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,8 @@ import mapas.AsociacionDatos;
 import algoritmos.Ordenacion;
 import utilidades.Transaccion;
 import utilidades.ComparadorTransaccion;
+import modelo.Pareja;
+import modelo.Registro;
 
 public class Main {
     private JFrame frame;
@@ -31,9 +35,10 @@ public class Main {
     private AsociacionDatos<String, Archivo> asociacionArchivos;
     private AsociacionDatos<Integer, String> asociacionNumeros;
     private TreeSet<String> nombresArchivosOrdenados;
-    private TreeSet<Transaccion> transaccionesOrdenadas;
     private AsociacionDatos<String, Transaccion> asociacionTransacciones;
-
+    private TreeSet<Transaccion> transaccionesOrdenadas;
+    private Registro registro;
+    private JList<String> listaVisualParejas;
     public Main() {
         frame = new JFrame("Sistema de Gestión y Análisis de Datos Multidimensionales");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -158,6 +163,40 @@ public class Main {
 
         tabbedPane.addTab("Análisis y Organización de Información", panelAnalisis);
 
+        // Crear el panel para la pestaña de Gestión de Datos Dinámicos
+        registro = new Registro();
+        listaVisualParejas = new JList<>();
+
+        JPanel panelDatosDinamicos = new JPanel();
+        panelDatosDinamicos.setLayout(new FlowLayout());
+
+        JTextField campoPrimerElemento = new JTextField(20);
+        JTextField campoSegundoElemento = new JTextField(20);
+        JButton botonAgregarPareja = new JButton("Agregar Pareja");
+        botonAgregarPareja.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int primerElemento = Integer.parseInt(campoPrimerElemento.getText());
+                    int segundoElemento = Integer.parseInt(campoSegundoElemento.getText());
+                    Pareja nuevaPareja = new Pareja(primerElemento, segundoElemento);
+                    registro.agregarDato(nuevaPareja.toString(), nuevaPareja);
+                    actualizarListaVisualParejas();
+                } catch (NumberFormatException ex) {
+                    mostrarMensaje("Debe ingresar números válidos.");
+                }
+            }
+        });
+
+        panelDatosDinamicos.add(new JLabel("Primer Elemento:"));
+        panelDatosDinamicos.add(campoPrimerElemento);
+        panelDatosDinamicos.add(new JLabel("Segundo Elemento:"));
+        panelDatosDinamicos.add(campoSegundoElemento);
+        panelDatosDinamicos.add(botonAgregarPareja);
+        panelDatosDinamicos.add(new JScrollPane(listaVisualParejas));
+
+        tabbedPane.addTab("Gestión de Datos Dinámicos", panelDatosDinamicos);
+
         frame.getContentPane().add(tabbedPane, BorderLayout.NORTH);
 
         archivosIndexados = new ArrayList<>();
@@ -254,6 +293,15 @@ public class Main {
 
     private void mostrarMensaje(String mensaje) {
         JOptionPane.showMessageDialog(frame, mensaje);
+    }
+
+    private void actualizarListaVisualParejas() {
+        List<Pareja> parejas = registro.getParejas();
+        String[] visualParejas = new String[parejas.size()];
+        for (int i = 0; i < parejas.size(); i++) {
+            visualParejas[i] = parejas.get(i).toString();
+        }
+        listaVisualParejas.setListData(visualParejas);
     }
 
     public static void main(String[] args) {

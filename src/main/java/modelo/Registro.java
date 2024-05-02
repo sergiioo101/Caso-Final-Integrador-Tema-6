@@ -1,6 +1,8 @@
 package modelo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Registro {
@@ -27,6 +29,16 @@ public class Registro {
         return "Registro{" +
                 "datos=" + datos +
                 '}';
+    }
+    // In Registro.java
+    public List<Pareja> getParejas() {
+        List<Pareja> parejas = new ArrayList<>();
+        for (Object valor : datos.values()) {
+            if (valor instanceof Pareja) {
+                parejas.add((Pareja) valor);
+            }
+        }
+        return parejas;
     }
 }
 
