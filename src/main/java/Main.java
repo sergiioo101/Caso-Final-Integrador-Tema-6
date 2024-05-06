@@ -39,12 +39,15 @@ public class Main {
     private TreeSet<Transaccion> transaccionesOrdenadas;
     private Registro registro;
     private JList<String> listaVisualParejas;
+
     public Main() {
         frame = new JFrame("Sistema de Gestión y Análisis de Datos Multidimensionales");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(1000, 1000);  // Establece un tamaño cuadrado para el marco.
 
         tabbedPane = new JTabbedPane();
 
+        // Configuración de los paneles y componentes...
         panelIndexacion = new JPanel();
         panelIndexacion.setLayout(new FlowLayout());
 
@@ -204,7 +207,6 @@ public class Main {
         panelArchivosIndexados.setLayout(new BoxLayout(panelArchivosIndexados, BoxLayout.Y_AXIS));
         frame.getContentPane().add(panelArchivosIndexados, BorderLayout.CENTER);
 
-        frame.pack();
         frame.setVisible(true);
     }
 
@@ -308,6 +310,7 @@ public class Main {
         new Main();
     }
 }
+
 
 
 
